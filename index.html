@@ -211,95 +211,95 @@
     <p class="mensagem sucesso" id="redirect-msg">Redirecionando para o login em 3...</p>
   </div>
 
-  <script>
-    function toggleSenha(idInput, svg) {
-      const input = document.getElementById(idInput);
-      const eyeOpen = svg.querySelector('.eye-open');
-      const strike = svg.querySelector('.strike');
+ <script>
+  function toggleSenha(idInput, svg) {
+    const input = document.getElementById(idInput);
+    const eyeOpen = svg.querySelector('.eye-open');
+    const strike = svg.querySelector('.strike');
 
-      if (input.type === "password") {
-        input.type = "text";
-        eyeOpen.style.opacity = '0.3';       // olho “fechado” (diminuído)
-        strike.classList.add('active');      // mostra risquinho com animação
+    if (input.type === "password") {
+      input.type = "text";
+      eyeOpen.style.opacity = '0.3';       // olho “fechado” (diminuído)
+      strike.classList.add('active');      // mostra risquinho com animação
+    } else {
+      input.type = "password";
+      eyeOpen.style.opacity = '1';         // olho aberto normal
+      strike.classList.remove('active');   // esconde risquinho
+    }
+  }
+
+  function getTokenFromURL() {
+    const hash = window.location.hash.substring(1); // remove o #
+    const params = new URLSearchParams(hash);
+    return params.get("access_token"); // pegar pelo nome correto
+  }
+
+  async function enviarNovaSenha() {
+    const senha = document.getElementById("novaSenha").value.trim();
+    const confirma = document.getElementById("confirmSenha").value.trim();
+    const token = getTokenFromURL();
+    const errorMsg = document.getElementById("error-msg");
+
+    errorMsg.textContent = "";
+
+    if (senha.length < 6) {
+      errorMsg.textContent = "A senha deve ter no mínimo 6 caracteres.";
+      return;
+    }
+
+    if (senha !== confirma) {
+      errorMsg.textContent = "As senhas não coincidem.";
+      return;
+    }
+
+    if (!token) {
+      errorMsg.textContent = "Token não encontrado na URL.";
+      return; 
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/proxy/redefinir-senha", {  // <-- URL do proxy
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ novaSenha: senha })
+      });
+
+      if (response.ok) {
+        mostrarTelaSucesso();
       } else {
-        input.type = "password";
-        eyeOpen.style.opacity = '1';         // olho aberto normal
-        strike.classList.remove('active');   // esconde risquinho
+        const error = await response.json();
+        errorMsg.textContent = error.message || "Erro ao redefinir a senha.";
       }
+    } catch (err) {
+      errorMsg.textContent = "Erro de conexão com o servidor.";
     }
+  }
 
-    function getTokenFromURL() {
-  const hash = window.location.hash.substring(1); // remove o #
-  const params = new URLSearchParams(hash);
-  return params.get("access_token"); // pegar pelo nome correto
-}
+  function mostrarTelaSucesso() {
+    document.getElementById("form-container").style.display = "none";
+    const sucessoContainer = document.getElementById("sucesso-container");
+    sucessoContainer.style.display = "block";
 
+    let count = 3;
+    const redirectText = document.getElementById("redirect-msg");
 
-    async function enviarNovaSenha() {
-      const senha = document.getElementById("novaSenha").value.trim();
-      const confirma = document.getElementById("confirmSenha").value.trim();
-      const token = getTokenFromURL();
-      const errorMsg = document.getElementById("error-msg");
-
-      errorMsg.textContent = "";
-
-      if (senha.length < 6) {
-        errorMsg.textContent = "A senha deve ter no mínimo 6 caracteres.";
-        return;
+    const countdown = setInterval(() => {
+      count--;
+      if (count > 0) {
+        redirectText.textContent = `Redirecionando para o login em ${count}...`;
+      } else {
+        clearInterval(countdown);
+        redirectText.textContent = `Redirecionando...`;
+        setTimeout(() => {
+          window.location.href = "http://192.168.1.253:3003/";
+        }, 600);
       }
+    }, 1000);
+  }
+</script>
 
-      if (senha !== confirma) {
-        errorMsg.textContent = "As senhas não coincidem.";
-        return;
-      }
-
-      if (!token) {
-        errorMsg.textContent = "Token não encontrado na URL.";
-        return; 
-      }
-
-      try {
-        const response = await fetch("https://kfltpzmhcxjcilnbrnjh.supabase.co/functions/v1/receber-token-redifinicao", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify({ novaSenha: senha })
-        });
-
-        if (response.ok) {
-          mostrarTelaSucesso();
-        } else {
-          const error = await response.json();
-          errorMsg.textContent = error.message || "Erro ao redefinir a senha.";
-        }
-      } catch (err) {
-        errorMsg.textContent = "Erro de conexão com o servidor.";
-      }
-    }
-
-    function mostrarTelaSucesso() {
-      document.getElementById("form-container").style.display = "none";
-      const sucessoContainer = document.getElementById("sucesso-container");
-      sucessoContainer.style.display = "block";
-
-      let count = 3;
-      const redirectText = document.getElementById("redirect-msg");
-
-      const countdown = setInterval(() => {
-        count--;
-        if (count > 0) {
-          redirectText.textContent = `Redirecionando para o login em ${count}...`;
-        } else {
-          clearInterval(countdown);
-          redirectText.textContent = `Redirecionando...`;
-          setTimeout(() => {
-            window.location.href = "http://192.168.1.253:3003/";
-          }, 600);
-        }
-      }, 1000);
-    }
-  </script>
 </body>
 </html>
