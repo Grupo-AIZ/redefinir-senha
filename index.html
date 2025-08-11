@@ -259,7 +259,7 @@
 
     try {
       const response = await fetch("http://localhost:3000/proxy/redefinir-senha", {  // <-- URL do proxy
-        method: "POST",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
