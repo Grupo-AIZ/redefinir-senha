@@ -229,9 +229,12 @@
   }
 
   function getTokenFromURL() {
-    const hash = window.location.hash.substring(1); // remove o #
-    const params = new URLSearchParams(hash);
-    return params.get("access_token"); // pegar pelo nome correto
+    // Pode buscar token tanto no hash quanto na query string
+    const hash = window.location.hash.substring(1); // remove #
+    const hashParams = new URLSearchParams(hash);
+    const queryParams = new URLSearchParams(window.location.search);
+
+    return hashParams.get("access_token") || queryParams.get("access_token");
   }
 
   async function enviarNovaSenha() {
@@ -270,7 +273,12 @@
       if (response.ok) {
         mostrarTelaSucesso();
       } else {
-        const error = await response.json();
+        let error = {};
+        try {
+          error = await response.json();
+        } catch {
+          // Falha ao parsear JSON, mantém error vazio
+        }
         errorMsg.textContent = error.error || error.message || "Erro ao redefinir a senha.";
       }
     } catch (err) {
@@ -300,6 +308,7 @@
     }, 1000);
   }
 </script>
+
 
 
 </body>
