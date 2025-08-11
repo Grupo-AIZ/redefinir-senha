@@ -230,7 +230,7 @@
 
     function getTokenFromURL() {
       const params = new URLSearchParams(window.location.search);
-      return params.get("token");
+      return params.get("access_token");
     }
 
     async function enviarNovaSenha() {
@@ -253,7 +253,7 @@
 
       if (!token) {
         errorMsg.textContent = "Token não encontrado na URL.";
-        return;
+        return; 
       }
 
       try {
