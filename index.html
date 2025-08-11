@@ -258,7 +258,7 @@
     }
 
     try {
-      const response = await fetch("http://localhost:3000/proxy/redefinir-senha", {  // <-- URL do proxy
+      const response = await fetch("http://localhost:3000/proxy/redefinir-senha", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -271,7 +271,7 @@
         mostrarTelaSucesso();
       } else {
         const error = await response.json();
-        errorMsg.textContent = error.message || "Erro ao redefinir a senha.";
+        errorMsg.textContent = error.error || error.message || "Erro ao redefinir a senha.";
       }
     } catch (err) {
       errorMsg.textContent = "Erro de conexão com o servidor.";
@@ -300,6 +300,7 @@
     }, 1000);
   }
 </script>
+
 
 </body>
 </html>
